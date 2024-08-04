@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stu-mnm-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stu-mnm-be  
+  template:
+    metadata:
+      labels:
+        app: stu-mnm-be
+    spec:
+      containers:
+      - name: stu-mnm-be
+        image: animshamura/student-be
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_HOST
+          value: "mysql-st-svc"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_DB
+          value: "studentdb"
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-app-user
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-app-user
+              key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stu-mnm-be
+spec:
+  selector:
+    app: stu-mnm-be
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080  # Ensure targetPort matches containerPort
